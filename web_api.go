@@ -1,9 +1,13 @@
 package main
 
-import "net/http"
+import (
+	"database/sql"
+	"net/http"
+)
 
 type WebApi struct {
-	smtp SmtpServer
+	smtp SmtpServerConfig
+	db   *sql.DB
 }
 
 func (web_api *WebApi) Register(mux *http.ServeMux) {

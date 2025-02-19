@@ -1,69 +1,42 @@
 package main
 
 import (
+	"database/sql"
+	"embed"
 	"errors"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
+//go:embed static
+var embededFiles embed.FS
+
 func main() {
-	smtp_server_host := os.Getenv("SMTP_SERVER")
-	if len(smtp_server_host) == 0 {
-		log.Fatal("Please supply smtp server via env variable SMTP_SERVER")
-	}
-
-	smtp_port_string := os.Getenv("SMTP_PORT")
-	if len(smtp_port_string) == 0 {
-		log.Fatal("Please supply smtp server port via env variable SMTP_PORT")
-	}
-	smtp_port, err := strconv.Atoi(smtp_port_string)
+	smtp_server, err := BuildSmtpServerConfig()
 	if err != nil {
-		log.Fatal("Please supply valid port number for smtp server port via env variable SMTP_PORT")
+		log.Fatal(err)
 	}
 
-	smtp_auth_string := os.Getenv("SKIP_AUTH")
-	smtp_auth := true
-	if len(smtp_auth_string) != 0 {
-		smtp_auth = false
+	db, err := sql.Open("sqlite3", "/data/smtp-sender.v1.db")
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer db.Close()
 
-	var smtp_user string
-	var smtp_pass string
-
-	if smtp_auth {
-		smtp_user := os.Getenv("SMTP_USER")
-		if len(smtp_user) == 0 {
-			log.Fatal("Please supply smtp server user via env variable SMTP_USER")
-		}
-
-		smtp_pass := os.Getenv("SMTP_PASS")
-		if len(smtp_pass) == 0 {
-			log.Fatal("Please supply smtp server password via env variable SMTP_PASS")
-		}
-	}
-
-	tls_mode := os.Getenv("TLS_MODE")
-	if len(tls_mode) != 0 {
-		if tls_mode != "none" && tls_mode != "insecure-tls" && tls_mode != "tls" {
-			log.Fatal("Please supply a tls mode value of: 'none', 'insecure-tls', 'tls', via env variable TLS_MODE, default if empty is none")
-		}
-	}
-
-	smtp_server := SmtpServer{
-		smtp_server_host,
-		smtp_port,
-		smtp_auth,
-		smtp_user,
-		smtp_pass,
-		tls_mode,
-	}
-
-	web_api := WebApi{smtp_server}
+	web_api := WebApi{smtp_server, db}
 
 	mux := http.NewServeMux()
 	web_api.Register(mux)
+
+	useOS := os.Getenv("DEBUG") == "1"
+	fs := http.FileServer(getFileSystem(useOS))
+	mux.Handle("/", fs)
+
+	log.Println("Server starting up on: ':8080'")
 
 	err = http.ListenAndServe(":8080", mux)
 	if errors.Is(err, http.ErrServerClosed) {
@@ -71,4 +44,19 @@ func main() {
 	} else if err != nil {
 		log.Fatalf("Error starting server: %s\n", err)
 	}
+}
+
+func getFileSystem(useOS bool) http.FileSystem {
+	if useOS {
+		log.Print("using live mode")
+		return http.FS(os.DirFS("static"))
+	}
+
+	log.Print("using embed mode")
+	fsys, err := fs.Sub(embededFiles, "static")
+	if err != nil {
+		panic(err)
+	}
+
+	return http.FS(fsys)
 }

@@ -1,6 +1,6 @@
 # Multistage Docker File
 
-ARG BUILDER_IMAGE=golang:alpine
+ARG BUILDER_IMAGE=golang:bookworm
 
 ############################
 # STEP 1 build binary
@@ -9,7 +9,10 @@ ARG BUILDER_IMAGE=golang:alpine
 FROM ${BUILDER_IMAGE} AS builder
 
 # Install dependencies for final container.
-RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive \
+        apt-get install --no-install-recommends --assume-yes \
+        build-essential libsqlite3-dev ca-certificates tzdata && update-ca-certificates
 
 # Create appuser
 ENV USER=appuser
@@ -35,7 +38,7 @@ RUN go mod download && go mod verify
 COPY . .
 
 # Build as static binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
     -ldflags='-w -s -extldflags "-static"' -a \
     -o /go/bin/server .
 
