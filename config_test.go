@@ -14,72 +14,72 @@ func TestBuildConfig(t *testing.T) {
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_Server, "Const_Env_Smtp_Server")
+		os.Setenv(ConstEnvSmtpServer, "ConstEnvSmtpServer")
 		_, err := BuildSmtpServerConfig()
 		assert.NotNil(t, err)
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_Port, "Const_Env_Smtp_Port")
+		os.Setenv(ConstEnvSmtpPort, "ConstEnvSmtpPort")
 		_, err := BuildSmtpServerConfig()
 		assert.NotNil(t, err)
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_Auth, "")
+		os.Setenv(ConstEnvSmtpAuth, "")
 		_, err := BuildSmtpServerConfig()
 		assert.NotNil(t, err)
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_Port, "123")
+		os.Setenv(ConstEnvSmtpPort, "123")
 		_, err := BuildSmtpServerConfig()
 		assert.Nil(t, err)
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_Tls, "Const_Env_Smtp_Tls")
+		os.Setenv(ConstEnvSmtpTls, "ConstEnvSmtpTls")
 		_, err := BuildSmtpServerConfig()
 		assert.NotNil(t, err)
 	}
 
-	os.Setenv(Const_Env_Smtp_Tls, "tls")
-	smtp_config, err := BuildSmtpServerConfig()
+	os.Setenv(ConstEnvSmtpTls, "tls")
+	smtpConfig, err := BuildSmtpServerConfig()
 	assert.Nil(t, err)
 
-	if assert.NotNil(t, smtp_config) {
-		assert.Equal(t, "Const_Env_Smtp_Server", smtp_config.Server)
-		assert.Equal(t, 123, smtp_config.Port)
-		assert.Equal(t, false, smtp_config.Auth)
-		assert.Equal(t, "tls", smtp_config.Tls)
+	if assert.NotNil(t, smtpConfig) {
+		assert.Equal(t, "ConstEnvSmtpServer", smtpConfig.Server)
+		assert.Equal(t, 123, smtpConfig.Port)
+		assert.Equal(t, false, smtpConfig.Auth)
+		assert.Equal(t, "tls", smtpConfig.Tls)
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_Auth, "1")
+		os.Setenv(ConstEnvSmtpAuth, "1")
 		_, err := BuildSmtpServerConfig()
 		assert.NotNil(t, err)
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_User, "Const_Env_Smtp_User")
+		os.Setenv(ConstEnvSmtpUser, "ConstEnvSmtpUser")
 		_, err := BuildSmtpServerConfig()
 		assert.NotNil(t, err)
 	}
 
 	{
-		os.Setenv(Const_Env_Smtp_Pass, "Const_Env_Smtp_Pass")
+		os.Setenv(ConstEnvSmtpPass, "ConstEnvSmtpPass")
 		_, err := BuildSmtpServerConfig()
 		assert.Nil(t, err)
 	}
 
-	smtp_config, err = BuildSmtpServerConfig()
+	smtpConfig, err = BuildSmtpServerConfig()
 	assert.Nil(t, err)
-	if assert.NotNil(t, smtp_config) {
-		assert.Equal(t, "Const_Env_Smtp_Server", smtp_config.Server)
-		assert.Equal(t, 123, smtp_config.Port)
-		assert.Equal(t, true, smtp_config.Auth)
-		assert.Equal(t, "Const_Env_Smtp_User", smtp_config.User)
-		assert.Equal(t, "Const_Env_Smtp_Pass", smtp_config.Pass)
-		assert.Equal(t, "tls", smtp_config.Tls)
+	if assert.NotNil(t, smtpConfig) {
+		assert.Equal(t, "ConstEnvSmtpServer", smtpConfig.Server)
+		assert.Equal(t, 123, smtpConfig.Port)
+		assert.Equal(t, true, smtpConfig.Auth)
+		assert.Equal(t, "ConstEnvSmtpUser", smtpConfig.User)
+		assert.Equal(t, "ConstEnvSmtpPass", smtpConfig.Pass)
+		assert.Equal(t, "tls", smtpConfig.Tls)
 	}
 }

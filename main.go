@@ -16,7 +16,7 @@ import (
 var embededFiles embed.FS
 
 func main() {
-	smtp_server, err := BuildSmtpServerConfig()
+	smtpServer, err := BuildSmtpServerConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,10 +27,15 @@ func main() {
 	}
 	defer db.Close()
 
-	web_api := WebApi{smtp_server, db}
+	datastore, err := MakeDataStore(db)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
-	web_api.Register(mux)
+
+	webApi := WebApi{smtpServer, datastore}
+	webApi.Register(mux)
 
 	useOS := os.Getenv("DEBUG") == "1"
 	fs := http.FileServer(getFileSystem(useOS))
