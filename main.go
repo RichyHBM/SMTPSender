@@ -21,7 +21,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err := sql.Open("sqlite3", "/data/smtp-sender.v1.db")
+	dbFile := "/data/smtp-sender.v1.db"
+
+	if _, err := os.Stat(dbFile); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			if dbFile, err := os.Create(dbFile); err != nil {
+				log.Fatal(err)
+			} else {
+				dbFile.Close()
+			}
+		} else {
+			log.Fatal(err)
+		}
+	}
+
+	db, err := sql.Open("sqlite3", dbFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,11 +67,11 @@ func main() {
 
 func getFileSystem(useOS bool) http.FileSystem {
 	if useOS {
-		log.Print("using live mode")
+		log.Print("Using live mode")
 		return http.FS(os.DirFS("static"))
 	}
 
-	log.Print("using embed mode")
+	log.Print("Using embed mode")
 	fsys, err := fs.Sub(embededFiles, "static")
 	if err != nil {
 		panic(err)
