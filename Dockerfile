@@ -1,6 +1,6 @@
 # Multistage Docker File
 
-ARG BUILDER_IMAGE=golang:bookworm
+ARG BUILDER_IMAGE=public.ecr.aws/docker/library/golang:bookworm
 
 ############################
 # STEP 1 build binary
