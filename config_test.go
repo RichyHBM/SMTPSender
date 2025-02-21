@@ -10,42 +10,42 @@ import (
 func TestBuildConfig(t *testing.T) {
 	{
 		_, err := BuildSmtpServerConfig()
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	}
 
 	{
 		os.Setenv(ConstEnvSmtpServer, "ConstEnvSmtpServer")
 		_, err := BuildSmtpServerConfig()
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	}
 
 	{
 		os.Setenv(ConstEnvSmtpPort, "ConstEnvSmtpPort")
 		_, err := BuildSmtpServerConfig()
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	}
 
 	{
 		os.Setenv(ConstEnvSmtpAuth, "")
 		_, err := BuildSmtpServerConfig()
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	}
 
 	{
 		os.Setenv(ConstEnvSmtpPort, "123")
 		_, err := BuildSmtpServerConfig()
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	}
 
 	{
 		os.Setenv(ConstEnvSmtpTls, "ConstEnvSmtpTls")
 		_, err := BuildSmtpServerConfig()
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	}
 
 	os.Setenv(ConstEnvSmtpTls, "tls")
 	smtpConfig, err := BuildSmtpServerConfig()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	if assert.NotNil(t, smtpConfig) {
 		assert.Equal(t, "ConstEnvSmtpServer", smtpConfig.Server)
@@ -57,23 +57,23 @@ func TestBuildConfig(t *testing.T) {
 	{
 		os.Setenv(ConstEnvSmtpAuth, "1")
 		_, err := BuildSmtpServerConfig()
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	}
 
 	{
 		os.Setenv(ConstEnvSmtpUser, "ConstEnvSmtpUser")
 		_, err := BuildSmtpServerConfig()
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	}
 
 	{
 		os.Setenv(ConstEnvSmtpPass, "ConstEnvSmtpPass")
 		_, err := BuildSmtpServerConfig()
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	}
 
 	smtpConfig, err = BuildSmtpServerConfig()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	if assert.NotNil(t, smtpConfig) {
 		assert.Equal(t, "ConstEnvSmtpServer", smtpConfig.Server)
 		assert.Equal(t, 123, smtpConfig.Port)

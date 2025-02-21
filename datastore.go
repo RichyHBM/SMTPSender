@@ -5,34 +5,6 @@ import (
 	"fmt"
 )
 
-type emptyFuncReturnErr func() error
-
-func nilErrsOrFail(errorReturnFuncs ...emptyFuncReturnErr) error {
-	for _, elem := range errorReturnFuncs {
-		if err := elem(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func prepareStatement(db *sql.DB, statement *sql.Stmt, query string) emptyFuncReturnErr {
-	return func() error {
-		var err error = nil
-		statement, err = db.Prepare(query)
-		return err
-	}
-}
-
-func execQueryIgnoreResult(db *sql.DB, query string) emptyFuncReturnErr {
-	return func() error {
-		if _, err := db.Exec(query); err != nil {
-			return err
-		}
-		return nil
-	}
-}
-
 type DataStore struct {
 	db *sql.DB
 
@@ -81,11 +53,19 @@ func MakeDataStore(db *sql.DB) (*DataStore, error) {
 		return nil, fmt.Errorf("nil sql.DB supplied to MakeDataStore")
 	}
 
-	if err := nilErrsOrFail(
-		execQueryIgnoreResult(db, createSenderTableSql),
-		execQueryIgnoreResult(db, createRecipientTableSql),
-		execQueryIgnoreResult(db, createMailTableSql),
-		execQueryIgnoreResult(db, createMailToRecipientsTableSql)); err != nil {
+	if _, err := db.Exec(createSenderTableSql); err != nil {
+		return nil, err
+	}
+
+	if _, err := db.Exec(createRecipientTableSql); err != nil {
+		return nil, err
+	}
+
+	if _, err := db.Exec(createMailTableSql); err != nil {
+		return nil, err
+	}
+
+	if _, err := db.Exec(createMailToRecipientsTableSql); err != nil {
 		return nil, err
 	}
 
@@ -102,19 +82,53 @@ func MakeDataStore(db *sql.DB) (*DataStore, error) {
 		getMailsBySenderStmt,
 		getMailsForRecipientStmt *sql.Stmt
 
-	if err := nilErrsOrFail(
-		prepareStatement(db, addSenderStmt, addSenderSql),
-		prepareStatement(db, addRecipientStmt, addRecipientSql),
-		prepareStatement(db, addMailStmt, addMailSql),
-		prepareStatement(db, addMailRecipientStmt, addMailRecipientSql),
-		prepareStatement(db, getSenderByIdStmt, getSenderByIdSql),
-		prepareStatement(db, getSenderByInitiatorStmt, getSenderByInitiatorSql),
-		prepareStatement(db, getSenderByEmailStmt, getSenderByEmailSql),
-		prepareStatement(db, getRecipientByIdStmt, getRecipientByIdSql),
-		prepareStatement(db, getRecipientByEmailStmt, getRecipientByEmailSql),
-		prepareStatement(db, getMailByIdStmt, getMailByIdSql),
-		prepareStatement(db, getMailsBySenderStmt, getMailsBySenderSql),
-		prepareStatement(db, getMailsForRecipientStmt, getMailsForRecipientSql)); err != nil {
+	var err error = nil
+
+	if addSenderStmt, err = db.Prepare(addSenderSql); err != nil {
+		return nil, err
+	}
+
+	if addRecipientStmt, err = db.Prepare(addRecipientSql); err != nil {
+		return nil, err
+	}
+
+	if addMailStmt, err = db.Prepare(addMailSql); err != nil {
+		return nil, err
+	}
+
+	if addMailRecipientStmt, err = db.Prepare(addMailRecipientSql); err != nil {
+		return nil, err
+	}
+
+	if getSenderByIdStmt, err = db.Prepare(getSenderByIdSql); err != nil {
+		return nil, err
+	}
+
+	if getSenderByInitiatorStmt, err = db.Prepare(getSenderByInitiatorSql); err != nil {
+		return nil, err
+	}
+
+	if getSenderByEmailStmt, err = db.Prepare(getSenderByEmailSql); err != nil {
+		return nil, err
+	}
+
+	if getRecipientByIdStmt, err = db.Prepare(getRecipientByIdSql); err != nil {
+		return nil, err
+	}
+
+	if getRecipientByEmailStmt, err = db.Prepare(getRecipientByEmailSql); err != nil {
+		return nil, err
+	}
+
+	if getMailByIdStmt, err = db.Prepare(getMailByIdSql); err != nil {
+		return nil, err
+	}
+
+	if getMailsBySenderStmt, err = db.Prepare(getMailsBySenderSql); err != nil {
+		return nil, err
+	}
+
+	if getMailsForRecipientStmt, err = db.Prepare(getMailsForRecipientSql); err != nil {
 		return nil, err
 	}
 
