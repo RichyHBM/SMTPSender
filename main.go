@@ -41,10 +41,15 @@ func main() {
 	}
 	defer db.Close()
 
+	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+		log.Fatal(err)
+	}
+
 	datastore, err := MakeDataStore(db)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer datastore.Close()
 
 	mux := http.NewServeMux()
 
