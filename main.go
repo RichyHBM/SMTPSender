@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"embed"
 	"errors"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/urfave/negroni"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -16,13 +17,14 @@ import (
 var embededFiles embed.FS
 
 func main() {
+	isDebug := os.Getenv("DEBUG") == "1"
+
 	smtpServer, err := BuildSmtpServerConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	dbFile := "/data/smtp-sender.v1.db"
-
 	if _, err := os.Stat(dbFile); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if dbFile, err := os.Create(dbFile); err != nil {
@@ -52,35 +54,23 @@ func main() {
 	defer datastore.Close()
 
 	mux := http.NewServeMux()
-
 	webApi := WebApi{smtpServer, datastore}
 	webApi.Register(mux)
 
-	useOS := os.Getenv("DEBUG") == "1"
-	fs := http.FileServer(getFileSystem(useOS))
-	mux.Handle("/", fs)
+	nux := negroni.New()
+	nux.Use(negroni.NewRecovery())
+	nux.Use(negroni.NewLogger())
+	if domainName := os.Getenv("DOMAIN_NAME"); len(domainName) > 0 {
+		nux.Use(MakeEnsureHeaderMiddleware("x-forwarded-host", domainName))
+		nux.Use(MakeEnsureHeaderMiddleware("Remote-User", ""))
+	}
+	nux.Use(negroni.NewStatic(GetHttpFileSystem(isDebug)))
+	nux.UseHandler(mux)
 
-	log.Println("Server starting up on: ':8080'")
-
-	err = http.ListenAndServe(":8080", mux)
+	err = http.ListenAndServe(":8080", nux)
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Println("Server closed")
 	} else if err != nil {
 		log.Fatalf("Error starting server: %s\n", err)
 	}
-}
-
-func getFileSystem(useOS bool) http.FileSystem {
-	if useOS {
-		log.Print("Using live mode")
-		return http.FS(os.DirFS("static"))
-	}
-
-	log.Print("Using embed mode")
-	fsys, err := fs.Sub(embededFiles, "static")
-	if err != nil {
-		panic(err)
-	}
-
-	return http.FS(fsys)
 }

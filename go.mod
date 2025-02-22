@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stretchr/testify v1.10.0
+	github.com/urfave/negroni v1.0.0
 )
 
 require (
