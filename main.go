@@ -55,7 +55,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	webApi := WebApi{smtpServer, datastore}
-	webApi.Register(mux)
+	webApi.register(mux)
 
 	nux := negroni.New()
 	nux.Use(negroni.NewRecovery())
