@@ -3,6 +3,7 @@ module github.com/richyhbm/smtp-sender
 go 1.24.0
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/negroni v1.0.0

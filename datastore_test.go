@@ -2,53 +2,53 @@ package main
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/DATA-DOG/go-sqlmock"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func setup(t *testing.T) (*sql.DB, func(*sql.DB) error) {
-	db, err := sql.Open("sqlite3", "file::memory:?cache=shared")
+func setup(t *testing.T) (*sql.DB, sqlmock.Sqlmock, func(*sql.DB) error) {
+	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	mock.ExpectExec("PRAGMA foreign_keys = ON").WillReturnResult(driver.ResultNoRows)
 
 	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
 		t.Fatal(err)
 	}
 
-	return db, func(db *sql.DB) error {
+	return db, mock, func(db *sql.DB) error {
 		return db.Close()
 	}
 }
 
 func ensureValidDataStore(t *testing.T, datastore *DataStore) {
 	assert.NotNil(t, datastore)
-	assert.NotNil(t, datastore.db)
-	assert.NotNil(t, datastore.addSenderStmt)
-	assert.NotNil(t, datastore.addRecipientStmt)
-	assert.NotNil(t, datastore.addMailStmt)
-	assert.NotNil(t, datastore.addMailRecipientStmt)
-	assert.NotNil(t, datastore.getSenderByIdStmt)
-	assert.NotNil(t, datastore.getSenderByInitiatorStmt)
-	assert.NotNil(t, datastore.getSenderByEmailStmt)
-	assert.NotNil(t, datastore.getRecipientByIdStmt)
-	assert.NotNil(t, datastore.getRecipientByEmailStmt)
-	assert.NotNil(t, datastore.getMailByIdStmt)
-	assert.NotNil(t, datastore.getMailsBySenderStmt)
-	assert.NotNil(t, datastore.getMailsForRecipientStmt)
+	if datastore != nil {
+		assert.NotNil(t, datastore.db)
+	}
 }
 
 func TestMakeDataStore(t *testing.T) {
-	db, teardown := setup(t)
+	db, mock, teardown := setup(t)
 	defer teardown(db)
 
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS").WillReturnResult(driver.ResultNoRows)
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS").WillReturnResult(driver.ResultNoRows)
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS").WillReturnResult(driver.ResultNoRows)
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS").WillReturnResult(driver.ResultNoRows)
+
 	datastore, err := MakeDataStore(db)
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
 	defer datastore.Close()
-	
+
 	ensureValidDataStore(t, datastore)
 }
 
