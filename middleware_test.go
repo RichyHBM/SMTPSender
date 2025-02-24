@@ -17,7 +17,7 @@ func TestEmptyEnsureHeaderMiddleware(t *testing.T) {
 	assert.NoError(t, err)
 
 	reqRecorder := httptest.NewRecorder()
-	
+
 	ensureHeaderMiddleware := MakeEnsureHeaderMiddleware("", "")
 	ensureHeaderMiddleware.ServeHTTP(reqRecorder, req, OkHandler)
 

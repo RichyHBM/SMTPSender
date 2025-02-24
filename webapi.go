@@ -5,7 +5,7 @@ import (
 )
 
 type WebApi struct {
-	smtp      SmtpServerConfig
+	smtp      *SmtpServerConfig
 	datastore *DataStore
 }
 
