@@ -23,22 +23,6 @@ type Mail struct {
 
 type DataStore struct {
 	db *sql.DB
-
-	addSenderStmt        *sql.Stmt
-	addRecipientStmt     *sql.Stmt
-	addMailStmt          *sql.Stmt
-	addMailRecipientStmt *sql.Stmt
-
-	getSenderByIdStmt        *sql.Stmt
-	getSenderByInitiatorStmt *sql.Stmt
-	getSenderByEmailStmt     *sql.Stmt
-
-	getRecipientByIdStmt    *sql.Stmt
-	getRecipientByEmailStmt *sql.Stmt
-
-	getMailByIdStmt          *sql.Stmt
-	getMailsBySenderStmt     *sql.Stmt
-	getMailsForRecipientStmt *sql.Stmt
 }
 
 const (
@@ -85,97 +69,10 @@ func MakeDataStore(db *sql.DB) (*DataStore, error) {
 		return nil, err
 	}
 
-	var addSenderStmt,
-		addRecipientStmt,
-		addMailStmt,
-		addMailRecipientStmt,
-		getSenderByIdStmt,
-		getSenderByInitiatorStmt,
-		getSenderByEmailStmt,
-		getRecipientByIdStmt,
-		getRecipientByEmailStmt,
-		getMailByIdStmt,
-		getMailsBySenderStmt,
-		getMailsForRecipientStmt *sql.Stmt
-
-	var err error = nil
-
-	if addSenderStmt, err = db.Prepare(addSenderSql); err != nil {
-		return nil, err
-	}
-
-	if addRecipientStmt, err = db.Prepare(addRecipientSql); err != nil {
-		return nil, err
-	}
-
-	if addMailStmt, err = db.Prepare(addMailSql); err != nil {
-		return nil, err
-	}
-
-	if addMailRecipientStmt, err = db.Prepare(addMailRecipientSql); err != nil {
-		return nil, err
-	}
-
-	if getSenderByIdStmt, err = db.Prepare(getSenderByIdSql); err != nil {
-		return nil, err
-	}
-
-	if getSenderByInitiatorStmt, err = db.Prepare(getSenderByInitiatorSql); err != nil {
-		return nil, err
-	}
-
-	if getSenderByEmailStmt, err = db.Prepare(getSenderByEmailSql); err != nil {
-		return nil, err
-	}
-
-	if getRecipientByIdStmt, err = db.Prepare(getRecipientByIdSql); err != nil {
-		return nil, err
-	}
-
-	if getRecipientByEmailStmt, err = db.Prepare(getRecipientByEmailSql); err != nil {
-		return nil, err
-	}
-
-	if getMailByIdStmt, err = db.Prepare(getMailByIdSql); err != nil {
-		return nil, err
-	}
-
-	if getMailsBySenderStmt, err = db.Prepare(getMailsBySenderSql); err != nil {
-		return nil, err
-	}
-
-	if getMailsForRecipientStmt, err = db.Prepare(getMailsForRecipientSql); err != nil {
-		return nil, err
-	}
-
 	return &DataStore{
 		db,
-		addSenderStmt,
-		addRecipientStmt,
-		addMailStmt,
-		addMailRecipientStmt,
-		getSenderByIdStmt,
-		getSenderByInitiatorStmt,
-		getSenderByEmailStmt,
-		getRecipientByIdStmt,
-		getRecipientByEmailStmt,
-		getMailByIdStmt,
-		getMailsBySenderStmt,
-		getMailsForRecipientStmt,
 	}, nil
 }
 
 func (datastore *DataStore) Close() {
-	datastore.addSenderStmt.Close()
-	datastore.addRecipientStmt.Close()
-	datastore.addMailStmt.Close()
-	datastore.addMailRecipientStmt.Close()
-	datastore.getSenderByIdStmt.Close()
-	datastore.getSenderByInitiatorStmt.Close()
-	datastore.getSenderByEmailStmt.Close()
-	datastore.getRecipientByIdStmt.Close()
-	datastore.getRecipientByEmailStmt.Close()
-	datastore.getMailByIdStmt.Close()
-	datastore.getMailsBySenderStmt.Close()
-	datastore.getMailsForRecipientStmt.Close()
 }
