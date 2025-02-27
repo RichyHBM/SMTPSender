@@ -9,7 +9,7 @@ import (
 const (
 	ConstEnvSmtpServer = "SMTP_SERVER"
 	ConstEnvSmtpPort   = "SMTP_PORT"
-	ConstEnvSmtpAuth   = "SKIP_AUTH"
+	ConstEnvSmtpAuth   = "USE_AUTH"
 	ConstEnvSmtpUser   = "SMTP_USER"
 	ConstEnvSmtpPass   = "SMTP_PASS"
 	ConstEnvSmtpTls    = "TLS_MODE"

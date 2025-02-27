@@ -27,6 +27,7 @@ func (web_api *WebApi) sendEmail(w http.ResponseWriter, req *http.Request) {
 
 	err := json.NewDecoder(req.Body).Decode(&request)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

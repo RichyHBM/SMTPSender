@@ -6,8 +6,62 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="SMTP Sender">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/milligram.css">
 </head>
 <body>
-  <h1>Hello World</h1>
+  <div class="container">
+    <form id="form">
+      <fieldset>
+        <label for="sender">Sender</label>
+        <input id="sender" name="sender" placeholder="Sender Address" />
+
+        <label for="recipients">Recipients</label>
+        <input id="recipients" name="recipients" placeholder="Recipients Emails" />
+
+        <label for="subject">Subject</label>
+        <input id="subject" name="subject" placeholder="Email Subject" />
+
+        <label for="body">Body</label>
+        <textarea id="body" name="body" placeholder="Email Body"></textarea>
+
+        <button class="button button-outline" type="submit">Send</button>
+      </fieldset>
+    </form>
+  </div>
+  <script type="text/javascript">
+    async function sendData(data, url) {
+      try {
+        const request = await fetch(url, {
+          method: 'POST',
+          body: data
+        });
+
+        const result = await request.text();
+        const ok = await request.ok;
+        if (ok) {
+          console.log(result);
+        } else {
+          console.error(result);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    const form = document.getElementById("form");
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      var data = {
+        sender: document.getElementById("sender").value,
+        recipients: document.getElementById("recipients").value.split(";"),
+        subject: document.getElementById("subject").value,
+        body: document.getElementById("body").value
+      };
+      sendData(JSON.stringify(data), "/api/send");
+    });
+  </script>
 </body>
 </html>

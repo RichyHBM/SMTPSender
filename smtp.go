@@ -13,15 +13,15 @@ func sendEmail(smtpConfig *SmtpServerConfig, sender string, recipients []string,
 	email := gomail.NewMsg()
 	// Populate email details
 	if err := email.From(sender); err != nil {
-		return err
+		return fmt.Errorf("failed to add from to email: %v", err)
 	}
 
 	if err := email.ReplyTo(sender); err != nil {
-		return err
+		return fmt.Errorf("failed to add reply-to to email: %v", err)
 	}
 
 	if err := email.To(recipients...); err != nil {
-		return err
+		return fmt.Errorf("failed to add recipients to email: %v", err)
 	}
 
 	email.Subject(subject)
@@ -61,7 +61,7 @@ func sendEmail(smtpConfig *SmtpServerConfig, sender string, recipients []string,
 	// Create a new client using the options
 	client, err := gomail.NewClient(smtpConfig.Server, clientOptions...)
 	if err != nil {
-		return fmt.Errorf("Failed to create SMTP client: %v", err)
+		return fmt.Errorf("failed to create SMTP client: %v", err)
 	}
 
 	if client == nil {
@@ -69,7 +69,7 @@ func sendEmail(smtpConfig *SmtpServerConfig, sender string, recipients []string,
 	}
 
 	if err := client.DialAndSend(email); err != nil {
-		return err
+		return fmt.Errorf("failed to dial and send: %v", err)
 	}
 
 	log.Printf("Email sent successfully from %s to %s\n", sender, strings.Join(recipients, ", "))
